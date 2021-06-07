@@ -9,3 +9,11 @@ retry_join  = ["{{ consul_retry_join | trim }}"]
 server      = {{ consul_server_bool | to_json }}
 
 bootstrap_expect = {{ consul_bootstrap_expect | trim }}
+
+connect {
+  enabled = true
+}
+
+ports {
+  grpc = 8502
+}
