@@ -1,0 +1,31 @@
+- name: Populate a list of installed snaps
+  ansible.builtin.shell: snap list | awk '{print $1}' | grep -v Name
+  ignore_errors: yes
+  register: snaps
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove installed snaps
+  community.general.snap:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ snaps.stdout_lines }}"
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove the snapd package
+  ansible.builtin.package:
+    name: snapd
+    state: absent
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Remove leftover snap directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /snap
+    - /var/snap
+    - /var/lib/snapd
+  become: yes
+  when: ansible_distribution == 'Ubuntu'

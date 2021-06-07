@@ -1,0 +1,19 @@
+bind_addr  = "0.0.0.0"
+datacenter = "{{ nomad_dc | trim }}"
+data_dir   = "/opt/nomad/data"
+
+server {
+  enabled = true
+
+  bootstrap_expect = {{ nomad_bootstrap_expect | trim }}
+}
+
+vault {
+  enabled = true
+
+  create_from_role = "nomad-cluster"
+
+  address        = "http://active.vault.service.consul:8200"
+  task_token_ttl = "1h"
+  token          = "{{ nomad_vault_token | trim }}"
+}

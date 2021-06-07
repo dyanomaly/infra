@@ -1,0 +1,36 @@
+- name: Set Config facts
+  ansible.builtin.set_fact:
+    nomad_dc: "{{ lookup('community.hashi_vault.hashi_vault','kv/nomad-config:dc' ~ vault_conn_string) }}"
+    nomad_vault_token: "{{ lookup('community.hashi_vault.hashi_vault','kv/nomad-config:vault-token' ~ vault_conn_string) }}"
+    nomad_bootstrap_expect: "{{ lookup('community.hashi_vault.hashi_vault','kv/nomad-config:bootstrap-expect' ~ vault_conn_string) }}"
+  no_log: true
+
+- name: Install Nomad package
+  ansible.builtin.package:
+    name: nomad
+    state: present
+  become: yes
+
+- name: Write Nomad server configuration
+  ansible.builtin.template:
+    src: nomad-server.hcl.j2
+    dest: /etc/nomad.d/server.hcl
+    owner: nomad
+    group: nomad
+    mode: '0644'
+  when: "'nomad-server' in group_names"
+  become: yes
+  notify:
+    - Enable and restart Nomad
+
+- name: Write Nomad client configuration
+  ansible.builtin.template:
+    src: nomad-client.hcl.j2
+    dest: /etc/nomad.d/client.hcl
+    owner: nomad
+    group: nomad
+    mode: '0644'
+  when: "'nomad-client' in group_names"
+  become: yes
+  notify:
+    - Enable and restart Nomad

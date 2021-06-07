@@ -1,0 +1,64 @@
+- name: Set Vault connection options
+  ansible.builtin.set_fact:
+    vault_conn_string: "{{ ' auth_method=ldap mount_point=ldap url=' ~ vault_url ~ ' validate_certs=no username=' ~ vault_ad_user ~ ' password=' ~ vault_ad_pass }}"
+  no_log: true
+
+- name: Retrieve AD information from vault
+  ansible.builtin.set_fact:
+    ad_realm: "{{ lookup('community.hashi_vault.hashi_vault','kv/active-directory:realm' ~ vault_conn_string) }}"
+    ad_user: "{{ lookup('community.hashi_vault.hashi_vault','kv/active-directory:username' ~ vault_conn_string) }}"
+    ad_pass: "{{ lookup('community.hashi_vault.hashi_vault','kv/active-directory:password' ~ vault_conn_string) }}"
+  no_log: true
+
+- name: Set dependencies for Ubuntu systems
+  ansible.builtin.set_fact:
+    dependencies:
+      - realmd
+      - sssd
+      - sssd-tools
+      - libnss-sss
+      - libpam-sss
+      - adcli
+      - samba-common-bin
+      - oddjob
+      - oddjob-mkhomedir
+      - packagekit
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install required packages
+  ansible.builtin.package:
+    name: "{{ dependencies }}"
+    state: present
+  become: yes
+
+- name: Bypass stub resolver
+  ansible.builtin.file:
+    src: /run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+  become: yes
+
+- name: Check for SSSD config
+  ansible.builtin.stat:
+    path: /etc/sssd/sssd.conf
+  register: sssd_conf
+
+- name: Join Active Directory
+  ansible.builtin.expect:
+    command: realm join --user={{ ad_user }} {{ ad_realm }}
+    responses:
+      Password for *: "{{ ad_pass }}"
+  when: not sssd_conf.stat.exists
+  become: yes
+  no_log: true
+
+- name: Disable qualified AD names
+  community.general.ini_file:
+    path: /etc/sssd/sssd.conf
+    section: domain/{{ ad_realm | trim }}
+    option: use_fully_qualified_names
+    value: no
+    mode: '0600'
+  become: yes
+  notify:
+    - Restart sssd

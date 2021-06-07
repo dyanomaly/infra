@@ -1,0 +1,21 @@
+- name: Enable and restart Consul
+  ansible.builtin.service:
+    name: nomad
+    state: restarted
+    enabled: yes
+  become: yes
+
+- name: Enable and restart Nomad
+  ansible.builtin.service:
+    name: nomad
+    state: restarted
+    enabled: yes
+  become: yes
+
+- name: Enable and restart Vault
+  ansible.builtin.service:
+    name: vault
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  become: yes

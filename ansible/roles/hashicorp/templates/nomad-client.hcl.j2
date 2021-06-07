@@ -1,0 +1,17 @@
+client {
+  enabled = true
+
+  options {
+    "docker.cleanup.image" = "true"
+  }
+
+  servers = ["127.0.0.1:4646"]
+}
+
+datacenter = "{{ nomad_dc | trim }}"
+data_dir   = "/etc/nomad.d"
+
+vault {
+  enabled = true
+  address = "http://active.vault.service.consul:8200"
+}

@@ -1,0 +1,38 @@
+- name: Set Vault connection options
+  ansible.builtin.set_fact:
+    vault_conn_string: "{{ ' auth_method=ldap mount_point=ldap url=' ~ vault_url ~ ' validate_certs=no username=' ~ vault_ad_user ~ ' password=' ~ vault_ad_pass }}"
+  no_log: true
+
+- name: Set DPKG architecture
+  ansible.builtin.set_fact:
+    dpkg_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+  when: ansible_os_family == 'Debian'
+
+- name: Import Hashicorp GPG key on Ubuntu systems
+  ansible.builtin.apt_key:
+    id: E8A032E094D8EB4EA189D270DA418C88A3219F7B
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Add Hashicorp repository into sources list on Ubuntu
+  ansible.builtin.apt_repository:
+    repo: |
+      deb [arch={{ dpkg_arch }}] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+    update_cache: yes
+    state: present
+  become: yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Consul
+  include: consul.yml
+  when: '"consul" in group_names'
+
+- name: Vault
+  include: vault-server.yml
+  when: '"vault" in group_names'
+
+- name: Nomad
+  include: nomad.yml
+  when: '"nomad" in group_names'

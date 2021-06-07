@@ -1,0 +1,34 @@
+- name: Set Config facts
+  ansible.builtin.set_fact:
+    consul_dc: "{{ lookup('community.hashi_vault.hashi_vault','kv/consul-config:dc' ~ vault_conn_string) }}"
+    consul_encrypt: "{{ lookup('community.hashi_vault.hashi_vault','kv/consul-config:encrypt' ~ vault_conn_string) }}"
+    consul_retry_join: "{{ lookup('community.hashi_vault.hashi_vault','kv/consul-config:retry-join' ~ vault_conn_string) }}"
+    consul_bootstrap_expect: "{{ lookup('community.hashi_vault.hashi_vault','kv/consul-config:bootstrap-expect' ~ vault_conn_string) }}"
+    consul_server_bool: "{{ 'true' if 'consul-server' in group_names else 'false' }}"
+  no_log: true
+
+- name: Install Consul package
+  ansible.builtin.package:
+    name: consul
+    state: present
+  become: yes
+
+- name: Create directory for Consul
+  ansible.builtin.file:
+    path: /var/consul
+    state: directory
+    owner: consul
+    group: consul
+    mode: '0755'
+  become: yes
+
+- name: Write Consul configuration
+  ansible.builtin.template:
+    src: consul.hcl.j2
+    dest: /etc/consul.d/consul.hcl
+    owner: consul
+    group: consul
+    mode: '0644'
+  become: yes
+  notify:
+    - Enable and restart Consul

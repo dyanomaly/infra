@@ -1,0 +1,16 @@
+---
+# provision-hashistack.yml
+#
+# This playbook is not a 'bootstrap', but intends to add another node to an existing environment.
+# Several assumptions are made:
+#   An existing Vault instance is available with necessary configuration K/V defined,
+#   An LDAP user is available to authenticate against vault, and join the machine to an AD domain.
+#
+
+- hosts: hashistack
+  roles:
+    - system
+    - auth
+    - docker
+    - { role: cni, cni_version: '0.9.1' }
+    - hashicorp

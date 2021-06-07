@@ -1,0 +1,11 @@
+ui = true
+
+bind_addr   = "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+client_addr = "0.0.0.0"
+datacenter  = "{{ consul_dc | trim }}"
+data_dir    = "/var/consul"
+encrypt     = "{{ consul_encrypt | trim }}"
+retry_join  = ["{{ consul_retry_join | trim }}"]
+server      = {{ consul_server_bool | to_json }}
+
+bootstrap_expect = {{ consul_bootstrap_expect | trim }}
