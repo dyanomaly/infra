@@ -1,0 +1,14 @@
+diff --git a/glamor/glamor_render.c b/glamor/glamor_render.c
+index be0741a..1dd2876 100644
+--- a/glamor/glamor_render.c
++++ b/glamor/glamor_render.c
+@@ -1584,6 +1584,8 @@ glamor_composite_clipped_region(CARD8 op,
+     if (prect != rect)
+         free(prect);
+  out:
++    glFinish();
++
+     if (temp_src != source)
+         FreePicture(temp_src, 0);
+     if (temp_mask != mask)
+ENDPATCH

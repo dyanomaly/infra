@@ -1,0 +1,29 @@
+app-text/xmlto text
+dev-cpp/gtkmm X
+dev-lang/rust system-bootstrap system-llvm llvm_targets_AArch64
+dev-libs/boost context python
+dev-libs/libdbusmenu gtk3
+dev-qt/qtcore icu
+dev-qt/qtgui X
+gui-libs/wlroots -elogind
+gui-wm/sway -elogind -swayidle
+media-libs/freetype harfbuzz
+media-libs/harfbuzz icu
+media-libs/imlib2 X
+media-libs/libepoxy X
+media-libs/libglvnd X
+media-libs/libpng apng
+media-libs/libvpx postproc
+media-libs/mesa -video_cards_* video_cards_vivante
+media-libs/mesa X
+net-fs/samba client
+net-misc/curl ssh
+sci-libs/fftw threads quad
+sys-libs/libcxxabi llvm-libunwind
+www-client/firefox -wifi
+x11-base/xorg-server -xorg minimal
+x11-libs/cairo X
+x11-libs/gtk+ X
+x11-libs/libxkbcommon X
+x11-libs/pango X
+x11-libs/wxGTK X libnotify gstreamer tiff

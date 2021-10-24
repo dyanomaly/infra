@@ -1,0 +1,4 @@
+cross-avr/binutils * -arm64 -~arm64
+cross-avr/gcc * -arm64 -~arm64
+cross-avr/avr-libc * -arm64 -~arm64
+cross-avr/gdb * ~* -arm64 -~arm64
