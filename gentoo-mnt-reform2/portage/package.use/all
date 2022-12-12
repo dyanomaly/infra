@@ -1,0 +1,48 @@
+app-admin/keepassxc yubikey
+app-crypt/gcr gtk
+app-doc/doxygen dot
+app-text/poppler cairo
+app-text/xmlto text
+dev-cpp/cairomm X
+dev-cpp/gtkmm X
+dev-lang/rust system-bootstrap system-llvm llvm_targets_AArch64
+dev-libs/boost context python
+dev-libs/libdbusmenu gtk3
+dev-qt/qtcore icu
+dev-qt/qtgui -eglfs X jpeg
+gui-apps/waybar tray network
+gui-libs/wlroots -elogind X
+gui-wm/sway -elogind -swayidle X
+mail-client/thunderbird -wifi
+media-libs/freetype harfbuzz utils
+media-libs/gd truetype
+media-libs/gegl cairo
+media-libs/harfbuzz icu
+media-libs/libepoxy X
+media-libs/libglvnd X
+media-libs/libpng apng
+media-libs/libvpx postproc
+media-libs/mesa -video_cards_* video_cards_vivante
+media-libs/mesa X
+media-video/ffmpeg libdrm v4l2-request
+media-video/mpv X
+net-fs/samba client 
+net-misc/curl ssh
+net-misc/freerdp openh264 X
+net-misc/remmina rdp ssh vnc
+net-wireless/iwd -crda
+sys-apps/busybox mdev
+sys-apps/dbus user-session X
+sys-apps/systemd policykit
+sys-auth/polkit duktape
+sys-devel/clang-common default-compiler-rt default-lld
+sys-devel/clang llvm-libunwind
+sys-libs/libcxxabi llvm-libunwind
+www-client/firefox -wifi
+www-client/surf tabbed
+x11-base/xorg-server -xorg minimal
+x11-libs/cairo X aqua 
+x11-libs/gtk+ X
+x11-libs/libxkbcommon X
+x11-libs/pango X
+x11-libs/wxGTK X libnotify gstreamer tiff

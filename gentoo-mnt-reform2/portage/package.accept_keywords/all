@@ -1,0 +1,46 @@
+app-admin/chrpath ~arm64
+app-admin/keepassxc ~arm64
+app-crypt/ccid ~arm64
+app-crypt/relic-toolkit ~arm64
+app-crypt/yubikey-manager ~arm64
+app-crypt/yubioath-desktop ~arm64
+app-editors/vscode ~arm64
+app-eselect/eselect-opencascade ~arm64
+app-misc/brightnessctl ~arm64
+dev-embedded/dfu-programmer ~arm64
+dev-libs/botan ~arm64 check
+dev-libs/date ~arm64
+dev-libs/olm ~arm64
+dev-python/fido2 ~arm64
+dev-python/pyotherside ~arm64
+dev-python/pyscard ~arm64
+dev-tcltk/itk ~arm64
+eww-client/surf ~arm64
+games-emulation/dosbox ~arm64
+games-engines/scummvm ~arm64
+gui-apps/waybar ~arm64
+gui-apps/wofi ~arm64
+gui-libs/gtk-layer-shell ~arm64 check
+mail-client/thunderbird ~arm64
+media-libs/libsoundtouch ~arm64 check
+media-libs/suil ~arm64 check
+media-sound/pavucontrol ~arm64
+#media-video/ffmpeg ~arm64 # TODO: re-evaluate v5
+media-video/mpv ~arm64
+#net-fs/samba ~arm64 # this pain may be over
+net-misc/remmina ~arm64
+net-misc/yt-dlp ~arm64
+sci-electronics/electronics-menu ~arm64
+sci-electronics/kicad ~arm64
+sci-electronics/ngspice ~arm64
+sci-libs/opencascade ~arm64
+sys-apps/reform-tools ~arm64
+sys-auth/libyubikey ~arm64
+sys-block/gparted ~arm64
+sys-cluster/teleport ~arm64
+sys-fs/exfat-utils ~arm64
+sys-fs/fuse-exfat ~arm64
+sys-kernel/linux-headers ~arm64
+sys-kernel/vanilla-sources ~arm64
+#sys-libs/ldb ~arm64 # samba dep
+#sys-libs/tdb ~arm64 # samba dep
