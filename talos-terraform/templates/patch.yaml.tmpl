@@ -1,0 +1,178 @@
+version: v1alpha1
+debug: false
+persist: true
+machine:
+    type: controlplane
+    certSANs:
+      - ${endpoint}
+      - ${hostname}
+      - ${fqdn}
+      - ${ip_address}
+
+    kubelet:
+        image: ${registry}/siderolabs/kubelet:v1.26.1
+        defaultRuntimeSeccompProfileEnabled: true
+        disableManifestsDirectory: true
+        extraConfig:
+            serverTLSBootstrap: true
+
+    network: {}
+    install:
+        disk: ${install_disk}
+        image: ${registry}/siderolabs/installer:v1.3.4
+        bootloader: true
+        wipe: true
+
+        extraKernelArgs:
+            - talos.platform=vmware
+
+    registries:
+        mirrors:
+            docker.io:
+              endpoints:
+              - https://${registry}/
+            gcr.io:
+              endpoints:
+              - https://${registry}/
+            ghcr.io:
+              endpoints:
+              - https://${registry}/
+            k8s.gcr.io:
+              endpoints:
+              - https://${registry}/
+            quay.io:
+              endpoints:
+              - https://${registry}/
+            registry.k8s.io:
+              endpoints:
+              - https://${registry}/
+        config:
+            ${registry}:
+                # The TLS configuration for the registry.
+                tls:
+                    insecureSkipVerify: true
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
+
+    sysctls:
+        net.ipv6.conf.lo.disable_ipv6: "1"
+
+cluster:
+    controlPlane:
+        endpoint: https://${endpoint}:6443
+    apiServer:
+        image: ${registry}/kube-apiserver:v1.26.1
+        certSANs:
+            - ${endpoint}
+            - ${hostname}
+            - ${fqdn}
+            - ${ip_address}
+
+        disablePodSecurityPolicy: true
+        admissionControl:
+            - name: PodSecurity
+              configuration:
+                apiVersion: pod-security.admission.config.k8s.io/v1alpha1
+                defaults:
+                    audit: restricted
+                    audit-version: latest
+                    enforce: baseline
+                    enforce-version: latest
+                    warn: restricted
+                    warn-version: latest
+                exemptions:
+                    namespaces:
+                        - kube-system
+                    runtimeClasses: []
+                    usernames: []
+                kind: PodSecurityConfiguration
+        auditPolicy:
+            apiVersion: audit.k8s.io/v1
+            kind: Policy
+            rules:
+                - level: Metadata
+    controllerManager:
+        image: ${registry}/kube-controller-manager:v1.26.1
+    proxy:
+        image: ${registry}/kube-proxy:v1.26.1
+        # disabled: false
+    scheduler:
+        image: ${registry}/kube-scheduler:v1.26.1
+    discovery:
+        enabled: true
+        registries:
+            kubernetes:
+                disabled: false
+            service:
+                endpoint: https://${registry}:3000/
+    inlineManifests:
+        - name: namespace-ci
+          contents: |-
+            apiVersion: apps/v1
+            kind: DaemonSet
+            metadata:
+              labels:
+                app: talos-vmtoolsd
+              name: talos-vmtoolsd
+              namespace: kube-system
+            spec:
+              selector:
+                matchLabels:
+                  app: talos-vmtoolsd
+              template:
+                metadata:
+                  labels:
+                    app: talos-vmtoolsd
+                spec:
+                  automountServiceAccountToken: false
+                  enableServiceLinks: false
+                  priorityClassName: system-node-critical
+                  restartPolicy: Always
+                  tolerations:
+                    - key: node.cloudprovider.kubernetes.io/uninitialized
+                      operator: Exists
+                      effect: NoSchedule
+                    - key: node-role.kubernetes.io/master
+                      operator: Exists
+                      effect: NoSchedule
+                    - key: node-role.kubernetes.io/control-plane
+                      operator: Exists
+                      effect: NoSchedule
+                  containers:
+                    - image: ${registry}/mologie/talos-vmtoolsd-unstable:latest
+                      imagePullPolicy: Always
+                      name: talos-vmtoolsd
+                      volumeMounts:
+                        - name: config
+                          mountPath: /etc/talos-vmtoolsd
+                          readOnly: true
+                      env:
+                        - name: TALOS_CONFIG_PATH
+                          value: /etc/talos-vmtoolsd/talosconfig
+                        - name: TALOS_HOST
+                          valueFrom:
+                            fieldRef:
+                              fieldPath: status.hostIP
+                      resources:
+                        requests:
+                          memory: 8Mi
+                        limits:
+                          memory: 64Mi
+                          cpu: 500m
+                      securityContext:
+                        readOnlyRootFilesystem: true
+                        allowPrivilegeEscalation: false
+                        runAsUser: 1002
+                        runAsGroup: 1002
+                  securityContext:
+                    fsGroup: 1002
+                  volumes:
+                    - name: config
+                      secret:
+                        secretName: talos-vmtoolsd-config
+                        defaultMode: 0400
+
+    coreDNS:
+        image: ${registry}/coredns/coredns:1.10.0
