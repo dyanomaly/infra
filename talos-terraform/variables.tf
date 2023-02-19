@@ -4,6 +4,24 @@ variable "cluster_name" {
   default     = "homelab"
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes release version used for container images"
+  type        = string
+  default     = "v1.26.1"
+}
+
+variable "installer_version" {
+  description = "Talos installer version"
+  type        = string
+  default     = "v1.3.4"
+}
+
+variable "coredns_version" {
+  description = "CoreDNS image version"
+  type        = string
+  default     = "1.10.0"
+}
+
 variable "node_data" {
   description = "A map of node data"
   type = object({

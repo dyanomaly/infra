@@ -1,31 +1,26 @@
-version: v1alpha1
-debug: false
-persist: true
 machine:
     type: controlplane
     certSANs:
       - ${endpoint}
-      - ${hostname}
-      - ${fqdn}
       - ${ip_address}
-
     kubelet:
-        image: ${registry}/siderolabs/kubelet:v1.26.1
+        image: ${registry}/siderolabs/kubelet:${kubernetes_version}
         defaultRuntimeSeccompProfileEnabled: true
         disableManifestsDirectory: true
         extraConfig:
             serverTLSBootstrap: true
-
     network: {}
     install:
         disk: ${install_disk}
-        image: ${registry}/siderolabs/installer:v1.3.4
+        image: ${registry}/siderolabs/installer:${installer_version}
         bootloader: true
         wipe: true
-
         extraKernelArgs:
             - talos.platform=vmware
-
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
     registries:
         mirrors:
             docker.io:
@@ -51,25 +46,24 @@ machine:
                 # The TLS configuration for the registry.
                 tls:
                     insecureSkipVerify: true
-    features:
-        rbac: true
-        stableHostname: true
-        apidCheckExtKeyUsage: true
-
     sysctls:
         net.ipv6.conf.lo.disable_ipv6: "1"
-
+    files:
+      - content: 
+        permissions: 0644
+        path: /etc/ssl/certs/ca-certificates
+        op: append
 cluster:
-    controlPlane:
-        endpoint: https://${endpoint}:6443
+    network:
+        podSubnets:
+            - 10.20.0.0/16
+        serviceSubnets:
+            - 10.40.0.0/16
     apiServer:
-        image: ${registry}/kube-apiserver:v1.26.1
+        image: ${registry}/kube-apiserver:${kubernetes_version}
         certSANs:
             - ${endpoint}
-            - ${hostname}
-            - ${fqdn}
             - ${ip_address}
-
         disablePodSecurityPolicy: true
         admissionControl:
             - name: PodSecurity
@@ -94,12 +88,13 @@ cluster:
             rules:
                 - level: Metadata
     controllerManager:
-        image: ${registry}/kube-controller-manager:v1.26.1
+        image: ${registry}/kube-controller-manager:${kubernetes_version}
+    coreDNS:
+        image: ${registry}/coredns/coredns:${coredns_version}
     proxy:
-        image: ${registry}/kube-proxy:v1.26.1
-        # disabled: false
+        image: ${registry}/kube-proxy:${kubernetes_version}
     scheduler:
-        image: ${registry}/kube-scheduler:v1.26.1
+        image: ${registry}/kube-scheduler:${kubernetes_version}
     discovery:
         enabled: true
         registries:
@@ -173,6 +168,3 @@ cluster:
                       secret:
                         secretName: talos-vmtoolsd-config
                         defaultMode: 0400
-
-    coreDNS:
-        image: ${registry}/coredns/coredns:1.10.0

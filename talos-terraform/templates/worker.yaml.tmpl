@@ -1,0 +1,66 @@
+machine:
+    type: worker
+    certSANs:
+      - ${ip_address}
+    kubelet:
+        image: ${registry}/siderolabs/kubelet:${kubernetes_version}
+        defaultRuntimeSeccompProfileEnabled: true
+        disableManifestsDirectory: true
+        extraConfig:
+            serverTLSBootstrap: true
+    install:
+        disk: ${install_disk}
+        image: ${registry}/siderolabs/installer:${installer_version}
+        bootloader: true
+        wipe: true
+        extraKernelArgs:
+            - talos.platform=vmware
+    features:
+        rbac: true
+        stableHostname: true
+        apidCheckExtKeyUsage: true
+    registries:
+        mirrors:
+            docker.io:
+              endpoints:
+              - https://${registry}/
+            gcr.io:
+              endpoints:
+              - https://${registry}/
+            ghcr.io:
+              endpoints:
+              - https://${registry}/
+            k8s.gcr.io:
+              endpoints:
+              - https://${registry}/
+            quay.io:
+              endpoints:
+              - https://${registry}/
+            registry.k8s.io:
+              endpoints:
+              - https://${registry}/
+        config:
+            ${registry}:
+                # The TLS configuration for the registry.
+                tls:
+                    insecureSkipVerify: true
+    sysctls:
+        net.ipv6.conf.lo.disable_ipv6: "1"
+    files:
+      - content: 
+        permissions: 0644
+        path: /etc/ssl/certs/ca-certificates
+        op: append
+cluster:
+    network:
+        podSubnets:
+            - 10.20.0.0/16
+        serviceSubnets:
+            - 10.40.0.0/16
+    discovery:
+        enabled: true
+        registries:
+            kubernetes:
+                disabled: true
+            service:
+                endpoint: https://${registry}:3000/

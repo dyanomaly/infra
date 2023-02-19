@@ -1,15 +1,23 @@
 resource "talos_machine_secrets" "machine_secrets" {}
 
 resource "talos_machine_configuration_controlplane" "machineconfig_cp" {
+  kubernetes_version = var.kubernetes_version
+
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${local.endpoint}:6443"
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  examples_enabled = false
+  docs_enabled     = false
 }
 
 resource "talos_machine_configuration_worker" "machineconfig_worker" {
+  kubernetes_version = var.kubernetes_version
+
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${local.endpoint}:6443"
   machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
+  examples_enabled = false
+  docs_enabled     = false
 }
 
 resource "talos_client_configuration" "talosconfig" {
@@ -25,13 +33,16 @@ resource "talos_machine_configuration_apply" "cp_config_apply" {
   endpoint              = each.key
   node                  = each.key
   config_patches = [
-    templatefile("${path.module}/templates/patch.yaml.tmpl", {
+    templatefile("${path.module}/templates/cp.yaml.tmpl", {
+      cluster_name = var.cluster_name
       registry     = local.registry
       endpoint     = local.endpoint
       ip_address   = each.key
-      hostname     = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
-      fqdn         = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : "${each.value.hostname}.${local.domain}"
       install_disk = each.value.install_disk
+
+      kubernetes_version = var.kubernetes_version
+      installer_version  = var.installer_version
+      coredns_version    = var.coredns_version
     })
   ]
 }
@@ -43,13 +54,15 @@ resource "talos_machine_configuration_apply" "worker_config_apply" {
   endpoint              = each.key
   node                  = each.key
   config_patches = [
-    templatefile("${path.module}/templates/patch.yaml.tmpl", {
+    templatefile("${path.module}/templates/worker.yaml.tmpl", {
+      cluster_name = var.cluster_name
       registry     = local.registry
       endpoint     = local.endpoint
       ip_address   = each.key
-      hostname     = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
-      fqdn         = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : "${each.value.hostname}.${local.domain}"
       install_disk = each.value.install_disk
+
+      kubernetes_version = var.kubernetes_version
+      installer_version  = var.installer_version
     })
   ]
 }
