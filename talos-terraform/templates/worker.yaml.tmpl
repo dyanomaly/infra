@@ -1,24 +1,16 @@
 machine:
-    type: worker
     certSANs:
       - ${ip_address}
     kubelet:
         image: ${registry}/siderolabs/kubelet:${kubernetes_version}
-        defaultRuntimeSeccompProfileEnabled: true
-        disableManifestsDirectory: true
         extraConfig:
             serverTLSBootstrap: true
     install:
         disk: ${install_disk}
         image: ${registry}/siderolabs/installer:${installer_version}
-        bootloader: true
         wipe: true
         extraKernelArgs:
             - talos.platform=vmware
-    features:
-        rbac: true
-        stableHostname: true
-        apidCheckExtKeyUsage: true
     registries:
         mirrors:
             docker.io:
@@ -41,7 +33,6 @@ machine:
               - https://${registry}/
         config:
             ${registry}:
-                # The TLS configuration for the registry.
                 tls:
                     insecureSkipVerify: true
     sysctls:
@@ -58,9 +49,6 @@ cluster:
         serviceSubnets:
             - 10.40.0.0/16
     discovery:
-        enabled: true
         registries:
-            kubernetes:
-                disabled: true
             service:
                 endpoint: https://${registry}:3000/
